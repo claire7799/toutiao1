@@ -22,7 +22,9 @@
 </template>
 
 <script>
+import store from '@/store'
 export default {
+
   data () {
     const checkTel = (rule, value, callback) => {
       if (!/^1[3-9]\d{9}$/.test(value)) { return callback(new Error('手机号格式不正确')) }
@@ -55,7 +57,9 @@ export default {
               this.formData
             )
             .then(res => {
-              console.log(res.data)
+              // console.log(res.data)
+              // 存储用户的信息到缓存中
+              store.setUser(res.data.data)
               this.$router.push('/')
             })
             .catch(() => {
