@@ -5,8 +5,11 @@ import 'element-ui/lib/theme-chalk/index.css'
 
 import axios from '@/api'
 import '@/style/index.less'
+
+import Mycomponent from '@/component'
 Vue.use(ElementUI)
 
+Vue.use(Mycomponent)
 Vue.prototype.$http = axios
 Vue.config.productionTip = false
 

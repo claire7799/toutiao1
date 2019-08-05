@@ -3,10 +3,8 @@
         <el-card>
              <div slot="header">
                  <!-- 面包屑 -->
-                 <el-breadcrumb separator-class="el-icon-arrow-right">
-                <el-breadcrumb-item :to="{ path: '/' }">首页</el-breadcrumb-item>
-                <el-breadcrumb-item>内容管理</el-breadcrumb-item>
-                </el-breadcrumb>
+                <bread>内容管理</bread>
+
             </div>
             <el-form  label-width="80px" size="small">
             <el-form-item label="状态：">
@@ -42,11 +40,48 @@
             </el-form-item>
             </el-form>
         </el-card>
+
+        <el-card class="list">
+            <div slot="header">
+                根据筛选条件共查询到 53400 条结果：
+            </div>
+             <el-table
+            :data="tableData"
+            style="width: 100%">
+            <el-table-column
+                prop="cover"
+                label="封面"
+                width="180">
+            </el-table-column>
+            <el-table-column
+                prop="title"
+                label="标题"
+                width="180">
+            </el-table-column>
+            <el-table-column
+                prop="status"
+                label="状态">
+            </el-table-column>
+            <el-table-column
+                prop="date"
+                label="发布时间"
+                width="180">
+            </el-table-column>
+            <el-table-column
+                label="操作">
+            </el-table-column>
+            </el-table>
+            <el-pagination
+            background
+            layout="prev, pager, next"
+            :total="1000">
+            </el-pagination>
+        </el-card>
     </div>
 </template>
 
 <script>
-
+// import Bread from '@/component/bread'
 export default {
   data () {
     return {
@@ -70,12 +105,23 @@ export default {
         status: null,
         channel_id: null
       },
-      dataArr: []
+      dataArr: [],
+      tableData: [{
+        cover: '2016-05-02',
+        title: '文章1',
+        status: '未审核',
+        date: '2019-05-09'
+      }]
     }
   }
 }
 </script>
 
-<style>
-
+<style lang="less" scoped>
+    .list{
+        margin-top: 20px;
+    }
+    .el-pagination{
+        text-align: center;
+    }
 </style>
