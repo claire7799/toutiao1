@@ -17,12 +17,13 @@
                  </el-radio-group>
             </el-form-item>
             <el-form-item label="频道：" >
-                <el-select v-model="reqParams.channel_id" placeholder="请选择">
+              <!-- clearable清除 -->
+                <el-select v-model="reqParams.channel_id" placeholder="请选择" clearable>
                     <el-option
-                    v-for="item in options"
-                    :key="item.value"
-                    :label="item.label"
-                    :value="item.value">
+                    v-for="item in channelOptions"
+                    :key="item.id"
+                    :label="item.name"
+                    :value="item.id">
                     </el-option>
                 </el-select>
             </el-form-item>
@@ -32,26 +33,37 @@
                 type="daterange"
                 range-separator="至"
                 start-placeholder="开始日期"
-                end-placeholder="结束日期">
+                end-placeholder="结束日期"
+                @change="changeDate"
+                value-format="yyyy-MM-dd"
+                >
                 </el-date-picker>
             </el-form-item>
             <el-form-item>
-            <el-button type="primary" >筛选</el-button>
+            <el-button type="primary" @click="select">筛选</el-button>
             </el-form-item>
             </el-form>
         </el-card>
 
         <el-card class="list">
             <div slot="header">
-                根据筛选条件共查询到 53400 条结果：
+                根据筛选条件共查询到 {{this.total}} 条结果：
             </div>
              <el-table
-            :data="tableData"
+            :data="articles"
+
             style="width: 100%">
             <el-table-column
                 prop="cover"
                 label="封面"
                 width="180">
+                <template slot-scope="scope">
+                    <el-image :src="scope.row.cover.images[0] " fit:cover style="width:90px;height:60px">
+                        <div slot="error">
+                            <img src="../../assets/images/error.gif" style="width:90px;height:60px">
+                        </div>
+                    </el-image>
+                </template>
             </el-table-column>
             <el-table-column
                 prop="title"
@@ -61,20 +73,38 @@
             <el-table-column
                 prop="status"
                 label="状态">
+                <template slot-scope="scope">
+                  <el-tag v-if="scope.row.status ===1">待审核</el-tag>
+                  <el-tag v-if="scope.row.status ===2" type="success">审核通过</el-tag>
+                  <el-tag v-if="scope.row.status ===0" type="info">草稿</el-tag>
+                  <el-tag v-if="scope.row.status ===3" type="warning">审核失败</el-tag>
+                  <el-tag v-if="scope.row.status ===4" type="danger">已删除</el-tag>
+                </template>
             </el-table-column>
             <el-table-column
-                prop="date"
+                prop="pubdate"
                 label="发布时间"
                 width="180">
+
             </el-table-column>
             <el-table-column
                 label="操作">
+                <template slot-scope="scope">
+                   <el-button type="primary" icon="el-icon-edit" circle plain @click="edit(scope.row.id)"></el-button>
+                    <el-button type="danger" icon="el-icon-delete" circle plain
+                    @click="del(scope.row.id)"></el-button>
+                </template>
             </el-table-column>
             </el-table>
             <el-pagination
             background
             layout="prev, pager, next"
-            :total="1000">
+            :page-size="reqParams.per_page"
+            :current-page="reqParams.page"
+            :total="total"
+            @current-change="changePage"
+
+            >
             </el-pagination>
         </el-card>
     </div>
@@ -85,33 +115,81 @@
 export default {
   data () {
     return {
-      options: [{
-        value: '1',
-        label: 'ios'
-      }, {
-        value: '2',
-        label: 'C++'
-      }, {
-        value: '3',
-        label: 'Java'
-      }, {
-        value: '4',
-        label: 'Android'
-      }, {
-        value: '5',
-        label: '人工智能'
-      }],
+      channelOptions: [],
       reqParams: {
         status: null,
-        channel_id: null
+        channel_id: null,
+        begin_pubdate: null,
+        end_pubdate: null,
+        page: 1,
+        per_page: 20
       },
       dataArr: [],
-      tableData: [{
-        cover: '2016-05-02',
-        title: '文章1',
-        status: '未审核',
-        date: '2019-05-09'
-      }]
+      articles: [],
+      total: 0
+    }
+  },
+  created () {
+    this.getChannelOptions()
+    this.getArticles()
+  },
+  methods: {
+    async getChannelOptions () {
+      const { data: { data } } = await this.$http.get('channels')
+      this.channelOptions = data.channels
+    },
+    async getArticles () {
+      const { data: { data } } = await this.$http.get('articles', { params: this.reqParams })
+      this.articles = data.results
+      this.total = data.total_count
+    },
+    changePage (newPage) {
+      this.reqParams.page = newPage
+      this.getArticles()
+    },
+    select () {
+      this.reqParams.page = 1
+      this.getArticles()
+    },
+    changeDate (dataArr) {
+      if (dataArr) {
+        this.reqParams.begin_pubdate = dataArr[0]
+        this.reqParams.end_pubdate = dataArr[1]
+      } else {
+        this.reqParams.begin_pubdate = null
+        this.reqParams.end_pubdate = null
+      }
+    },
+    edit (id) {
+      // 跳转到发布文章页面
+      this.$router.push('/publish?id=' + id)
+    },
+    del (id) {
+      this.$confirm('此操作将永久删除该文章, 是否继续?', '提示', {
+        confirmButtonText: '确定',
+        cancelButtonText: '取消',
+        type: 'warning'
+      }).then(async () => {
+        await this.$http.delete(`articles/${id}`)
+        this.$message({
+          type: 'success',
+          message: '删除成功!'
+        })
+        this.getArticles()
+      }).catch(() => {
+        this.$message({
+          type: 'info',
+          message: '已取消删除'
+        })
+      })
+    }
+  },
+  // watch 侦听器的使用场景：当你需要监听某一个属性的变化，去做一些开销较大操作(异步操作)
+  watch: {
+    'reqParams.channel_id': function (newVal, oldVal) {
+      if (newVal === '') {
+        this.reqParams.channel_id = null
+      }
     }
   }
 }
