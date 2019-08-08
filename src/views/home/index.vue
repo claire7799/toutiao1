@@ -47,19 +47,19 @@
                 <span class="el-icon-s-fold" @click="toggoleMenu()"></span>
                 <span class="text">江苏传智播客科技教育有限公司</span>
 
-                <el-dropdown>
+                <el-dropdown  @command ="changeMenu">
                     <span class="el-dropdown-link">
-                    <img src="../../assets/images/avatar.jpg" alt="">
-                     当前用户姓名
+                    <img :src="photo" alt="">
+                     {{name}}
                     <i class="el-icon-arrow-down el-icon--right"></i>
                     </span>
                     <el-dropdown-menu slot="dropdown">
-                        <el-dropdown-item>
-                            <i class="el-icon-setting"></i>
+                        <el-dropdown-item command="setting">
+                            <i class="el-icon-setting" ></i>
                             个人设置
                         </el-dropdown-item>
-                        <el-dropdown-item>
-                            <i class="el-icon-unlock"></i>
+                        <el-dropdown-item command="logout">
+                            <i class="el-icon-unlock" ></i>
                             退出登录
                         </el-dropdown-item>
                     </el-dropdown-menu>
@@ -73,15 +73,33 @@
 </template>
 
 <script>
+import store from '@/store'
 export default {
   data () {
     return {
-      isCollapse: false
+      isCollapse: false,
+      name: '',
+      photo: ''
     }
+  },
+  created () {
+    const user = store.getUser()
+    this.name = user.name
+    this.photo = user.photo
   },
   methods: {
     toggoleMenu () {
       this.isCollapse = !this.isCollapse
+    },
+    setting () {
+      this.$router.push('/setting')
+    },
+    logout () {
+      store.clearUser()
+      this.$router.push('/login')
+    },
+    changeMenu (menuType) {
+      this[menuType]()
     }
   }
 }
