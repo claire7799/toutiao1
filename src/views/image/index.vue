@@ -182,11 +182,11 @@ export default {
             color: #fff;
             span{
                 margin:0 20px;
+                // &.selected是设置span的selected属性的样式
                  &.selected{
                 color:red;
                 }
             }
-            // &.selected是设置span的selected属性的样式
 
         }
     }
