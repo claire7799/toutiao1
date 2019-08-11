@@ -130,6 +130,7 @@ export default {
       this.$message.success(data.collect ? '添加收藏成功' : '取消收藏成功')
       item.is_collected = data.collect
     },
+    // 删除
     deleteCollect (item) {
       this.$confirm('此操作将永久删除该素材, 是否继续?', '温馨提示', {
         confirmButtonText: '确定',

@@ -2,6 +2,10 @@ body {
   margin: 0;
   padding: 0;
 }
+.avatar-uploader {
+  width: 180px;
+  margin: 0 auto;
+}
 .avatar-uploader .el-upload {
   border: 1px dashed #d9d9d9;
   border-radius: 6px;
@@ -24,4 +28,13 @@ body {
   width: 178px;
   height: 178px;
   display: block;
+}
+.publish-content .ql-toolbar.ql-snow {
+  padding: 0 8px;
+}
+.publish-content .ql-container.ql-snow {
+  height: 300px;
+}
+.el-dialog__body {
+  padding-bottom: 0px;
 }
