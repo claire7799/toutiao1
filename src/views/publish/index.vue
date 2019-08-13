@@ -2,7 +2,7 @@
     <div class="publish-content">
         <el-card>
             <div slot="header">
-                <bread>发布文章</bread>
+                <bread>{{articleId?'修改文章':'发表文章'}}</bread>
             </div>
             <el-form ref="form" :model="pubForm" label-width="100px">
                 <!-- 标题字符要在5-30个，否则会报错 无法提交  可以做个判断提示一下 -->
@@ -35,9 +35,13 @@
                 <el-form-item label="频道：">
                     <my-channel v-model="pubForm.channel_id"></my-channel>
                 </el-form-item>
-                 <el-form-item>
+                 <el-form-item v-if="!articleId">
                     <el-button type="primary" @click="submit(false)">发表</el-button>
                     <el-button @click="submit(true)">存入草稿</el-button>
+                </el-form-item>
+                <el-form-item v-else>
+                    <el-button type="primary" @click="update(false)">修改</el-button>
+                    <el-button @click="update(true)">存入草稿</el-button>
                 </el-form-item>
             </el-form>
         </el-card>
@@ -75,12 +79,34 @@ export default {
         },
         channel_id: null
       },
-      dialogVisible: false
-
+      dialogVisible: false,
+      articleId: null
     }
   },
   components: {
     quillEditor
+  },
+  created () {
+    this.articleId = this.$route.query.id
+    if (this.articleId) {
+      this.getArticle()
+    }
+  },
+  watch: {
+    $route () {
+      if (!this.$route.query.id) {
+        this.articleId = null
+        this.pubForm = {
+          title: '',
+          content: '',
+          cover: {
+            type: 1,
+            images: []
+          },
+          channel_id: null
+        }
+      }
+    }
   },
   methods: {
     changeType () {
@@ -90,8 +116,18 @@ export default {
       await this.$http.post(`articles?draft=${draft}`, this.pubForm)
       this.$message.success(draft ? '文章存入草稿成功' : '文章发表成功')
       this.$router.push('/article')
+    },
+    async getArticle () {
+      const { data: { data } } = await this.$http.get(`articles/${this.$route.query.id}`)
+      this.pubForm = data
+    },
+    async update (draft) {
+      await this.$http.put(`articles/${this.$route.query.id}?draft=${draft}`, this.pubForm)
+      this.$message.success(draft ? '文章存入草稿成功' : '文章发表成功')
+      this.$router.push('/article')
     }
   }
+
 }
 </script>
 
